@@ -26,6 +26,14 @@ const dboptions = {
   poolSize: 10
 }
 // TODO : connect mongodb here
+if (!process.env.MONGO_URL) {
+  console.error('Missing MONGO_URL!!!')
+  process.exit(1)
+}
+
+mongoose.connect(process.env.MONGO_URL,{
+  dboptions
+},(err)=>console.log('connected!!!'))
 
 routes(app)
 

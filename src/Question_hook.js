@@ -13,17 +13,47 @@ function Question() {
   const [score, setScore] = useState(0)            // Your score
   const [current_question, setCurrentQuestion] = useState(0) // index to current question
 
-  const next = () => {
+  const next = async() => {
     // TODO : switch to the next question,
     // and check answers to set the score after you finished the last question
+    if(current_question+1===contents.length){
+      setComplete(true)
+      const {
+        data:{
+          message,score
+        }}=await instance.post('/checkAns',{answer:ans})
+        console.log(message)
+        console.log(score)
+      document.getElementById('question-title').innerText = "Your Score: " +score + "/" + contents.length;
+      document.getElementById('options').style.display = "none";
+      document.getElementById('actions').style.display = "none";
+    }
+    else{
+      document.getElementById(`q${current_question+1}_${ans[current_question]}`).checked=false
+      setCurrentQuestion(current_question+1)
+    }
   }
 
-  const choose = () => {
+  const choose = (indexx) => {
     // TODO : update 'ans' for the option you clicked
+    const a=[...ans]
+    a[current_question]=indexx
+    setAns(a)
+    console.log(a)
   }
 
-  const getQuestions = () => {
+  const getQuestions = async() => {
     // TODO : get questions from backend
+    const {
+      data:{
+        message,contents
+      }
+    }
+    = await instance.get('/getContents')
+    console.log(message)
+    
+    setContents(contents)
+
   }
 
   useEffect(() => {
@@ -38,16 +68,24 @@ function Question() {
         <React.Fragment>
           <div id="question-box">
             <div className="question-box-inner">
-
+              Question {current_question+1} of {contents.length}
             </div>
           </div>
-
           <div id="question-title">
-            
+            {contents[current_question].question}
           </div>
 
           <div id="options">
-            
+            {contents[current_question].options.map((op,idd)=>
+              <div className='each-option'>
+                <input type='radio' 
+                      id={`q${current_question+1}_${idd+1}`}
+                      name='option'
+                      onChange={()=>choose(idd+1)}
+                      />
+                <span>{op}</span>
+              </div>
+            )}
           </div>
           
           <div id="actions" onClick={next}>
